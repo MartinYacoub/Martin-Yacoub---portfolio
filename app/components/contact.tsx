@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 
-// Define validation schema
+// Validation schema
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
@@ -13,7 +13,7 @@ const contactSchema = z.object({
 });
 
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "loading">("idle");
 
   const {
     register,
@@ -24,10 +24,31 @@ export default function Contact() {
     resolver: zodResolver(contactSchema),
   });
 
-  const onSubmit = (data: any) => {
-    console.log("Form submitted:", data);
-    setSubmitted(true);
-    reset(); // clear form
+  const onSubmit = async (data: any) => {
+    try {
+      setStatus("loading");
+
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        reset();
+        setStatus("success");
+        setTimeout(() => setStatus("idle"), 2000); // back to normal after 2s
+      } else {
+        alert("Failed to send. Try again.");
+        setStatus("idle");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send. Try again.");
+      setStatus("idle");
+    }
   };
 
   return (
@@ -37,7 +58,7 @@ export default function Contact() {
     >
       <div className="max-w-3xl mx-auto px-6 text-center">
         <h2 className="text-slate-900 dark:text-white text-4xl font-black mb-6">
-          Let&apos;s work together.
+          {"Let's work together."}
         </h2>
         <p className="text-slate-600 dark:text-slate-400 text-lg mb-12">
           I am currently open to freelance opportunities and full-time roles.
@@ -101,18 +122,22 @@ export default function Contact() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="self-center px-8 py-3 bg-primary text-slate-700 cursor-pointer font-semibold rounded-2xl w-full transition-all shadow-md hover:bg-slate-200 hover:tracking-widest"
+            className={`self-center px-8 py-3 font-semibold rounded-2xl w-full transition-all shadow-md hover:tracking-widest ${
+              status === "success"
+                ? "bg-green-500 text-white"
+                : status === "loading"
+                  ? "bg-primary/70 text-slate-700 cursor-not-allowed"
+                  : "bg-primary text-slate-700 hover:bg-slate-200"
+            }`}
+            disabled={status === "loading"}
           >
-            Send
+            {status === "loading"
+              ? "Sending..."
+              : status === "success"
+                ? "Sent!"
+                : "Send"}
           </button>
         </form>
-
-        {/* Success Message */}
-        {submitted && (
-          <p className="text-green-500 mt-6 font-semibold">
-            Your message has been sent!
-          </p>
-        )}
       </div>
     </section>
   );

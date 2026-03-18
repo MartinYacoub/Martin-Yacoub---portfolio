@@ -33,7 +33,7 @@ export default function About() {
             </p>
 
             {/* Stats / Highlights */}
-            <div className="grid grid-cols-2 gap-6 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
               <StatCard number="React & Next.js" label="Focused Skills" />
               <StatCard number="Portfolio" label="Projects Built" />
               <StatCard number="Client Collaboration" label="Approach" />
