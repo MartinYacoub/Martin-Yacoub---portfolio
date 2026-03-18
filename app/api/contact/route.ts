@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("Missing RESEND_API_KEY in environment variables");
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+interface ContactData {
+  name: string;
+  email: string;
+  message: string;
+}
 
 export async function POST(req: Request) {
   try {
-    const { name, email, message } = await req.json();
+    const { name, email, message } = (await req.json()) as ContactData;
 
     await resend.emails.send({
-      from: "Your Name <hello@yourdomain.com>",
+      from: "Martin-Yacoub-Portfolio <yacoubmartin@gmail.com>", // verified email
       to: process.env.EMAIL_TO as string,
       subject: `New message from ${name}`,
       html: `
@@ -21,7 +31,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("Contact API error:", err);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
