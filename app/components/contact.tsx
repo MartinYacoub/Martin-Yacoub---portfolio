@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 // Validation schema
 const contactSchema = z.object({
@@ -28,22 +29,21 @@ export default function Contact() {
     try {
       setStatus("loading");
 
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      // Send email using EmailJS
+      await emailjs.send(
+        "service_br7pm58",
+        "template_amqh6hw",
+        {
+          from_name: data.name,
+          from_email: data.email,
+          message: data.message,
+        },
+        "emailFromMyPortfolio",
+      );
 
-      const result = await res.json();
-
-      if (result.success) {
-        reset();
-        setStatus("success");
-        setTimeout(() => setStatus("idle"), 2000); // back to normal after 2s
-      } else {
-        alert("Failed to send. Try again.");
-        setStatus("idle");
-      }
+      reset();
+      setStatus("success");
+      setTimeout(() => setStatus("idle"), 2000); // back to normal after 2s
     } catch (err) {
       console.error(err);
       alert("Failed to send. Try again.");
