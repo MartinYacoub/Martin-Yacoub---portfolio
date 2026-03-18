@@ -31,14 +31,14 @@ export default function Contact() {
 
       // Send email using EmailJS
       await emailjs.send(
-        "service_br7pm58",
-        "template_amqh6hw",
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
         {
           from_name: data.name,
           from_email: data.email,
           message: data.message,
         },
-        "emailFromMyPortfolio",
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
       );
 
       reset();
